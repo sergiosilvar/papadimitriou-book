@@ -23,7 +23,7 @@ def _to_int(s):
 def _leftmost(n,k):
     return n>>k
 
-#FIXME: Improve the inneficient below
+#FIXME: Improve below.
 def _rightmost(n,k):
     return _to_int(_to_bin(n)[-k:])
     
@@ -39,6 +39,7 @@ def multiply(x,y):
 
     #FIXME:Inneficient way in discovering max without using log or multiplications.
     n = max(len(_to_bin(x)),len(_to_bin(y)))
+    
     if n==1:return x&y
     
    

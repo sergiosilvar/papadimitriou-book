@@ -141,21 +141,13 @@ class Graph:
         return cc
     
             
-# FIXME:Remove
-# Book structures for "explore".
-#_cc = 0 # The connected component id.
-#_clock = 0 # Identifies the "prevsit" and "postvisit" order of the nodes during "explore".
     
 def previsit(G,v):
-    # FIXME: Remove
-    #global _clock # Python requirement to write on global variables.
     G.ccnum[v] = G._cc
     G.pre[v] = G._clock
     G._clock += 1
  
 def postvisit(G,v):
-    # FIXME: Remove
-    #global _clock
     G.post[v] = G._clock
     G._clock += 1
     
