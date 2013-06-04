@@ -8,12 +8,6 @@ Created on 02/05/2013
 
 class Graph:
 
-
-    _directed = None
-    _dict_weight = None
-    _list_adj = None
-    _cc = 0
-    _clock = 0
     
     # Structures from the book.
     visited = {} # Identifies whether a node was visited.
@@ -23,10 +17,11 @@ class Graph:
     
     def __init__(self,directed=False):
         self._directed = directed
-        self._dict_weight = {}
+        self._edge_weight = {}
         self._list_adj = {}
         self._cc = 0
         self._clock = 0
+        self.dfs_deprecated = True
 
     def add_edge(self, v1,v2,w=1):
         '''
@@ -50,15 +45,15 @@ class Graph:
             l_nodes_from_v1 = self._list_adj[v1]
             if l_nodes_from_v1.count(v2) == 0:
                 l_nodes_from_v1.append(v2)
-            self._dict_weight[(v1,v2)] = w
+            self._edge_weight[(v1,v2)] = w
 
         # Adds the directed edge.
         _add_edge(v1,v2,w)
-        
         # If the Graph is not directed, create the other edge.
         if not self._directed:
             _add_edge(v2,v1,w)
-            
+        self.dfs_deprecated = True
+
     def has_edge(self,v1,v2):
         _result = False
         if self._list_adj.has_key(v1):
@@ -76,19 +71,22 @@ class Graph:
         if not self._directed:
             l = self._list_adj[v2]
             l.remove(v1)
+            self._edge_weight.pop((v1,v2))
         _result = True
+        self.dfs_deprecated = True
         return _result
         
     def add_node(self,v):
         if not self.has_node(v):
             self._list_adj[v]= []
+        self.dfs_deprecated = True
         
     def nodes(self):
         '''
         @return List of nodes.
         '''
         l = self._list_adj.keys()
-        l.sort()
+        #l.sort()
         return l
     
     def nodes_from(self,v):
@@ -100,6 +98,18 @@ class Graph:
         l_edges = self.edges(v)
         for (x,y,w) in l_edges:
             _result.append(y)
+        return _result
+    
+    def nodes_to(self,v):
+        '''
+        @return A list of nodes that "v" reaches.
+        @param v: A given node.
+        '''
+        _result = []
+        l_all_edges = self.edges()
+        for (x,y,w) in l_all_edges:
+            if y == v:
+                _result.append(y)
         return _result
     
     
@@ -126,7 +136,7 @@ class Graph:
         @param v1: Stard node.
         @param v2: End node.
         '''
-        w = self._dict_weight[(v1,v2)]
+        w = self._edge_weight[(v1,v2)]
         return (v1,v2,w)
     
     def connected_components(self):
@@ -140,7 +150,41 @@ class Graph:
             cc[value].append(key)
         return cc
     
+    def is_connected(self):
+        if self.dfs_deprecated:
+            raise GraphError('DFS is deprecated! Run DFS first.')
+        for cc in self.ccnum.itervalues():
+            if cc != 0: return False
+        return True
+        
+    def has_cycle(self):
+        if self.dfs_deprecated:
+            raise GraphError('DFS is deprecated! Run DFS first.')
+    
+    def remove_node(self,v):
+        def remove_from_dict(dic,v):
+            if dic.has_key(v): dic.pop(v)
+        
+        for i in self.nodes_from(v):
+            self.remove_edge(v, i)
             
+        for i in self.nodes_to(v):
+            self.remove_edge(i, v)
+        
+        remove_from_dict(self.visited,v) 
+        remove_from_dict(self.ccnum,v) 
+        remove_from_dict(self.pre,v) 
+        remove_from_dict(self.post,v)
+        remove_from_dict(self._list_adj,v)
+        self.dfs_deprecated = True
+
+        
+class GraphError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
     
 def previsit(G,v):
     G.ccnum[v] = G._cc
@@ -210,7 +254,8 @@ def dfs(G):
         if not G.visited[v]:
             explore(G,v)
             G._cc += 1 # Increments the component connected id as a new node will be visited from a new explore.
-           
+    G.dfs_deprecated = False
+    
 def iterative_dfs(G):
     '''
     Uses the iterative deep-first version on graph G.
@@ -227,10 +272,12 @@ def iterative_dfs(G):
         if not G.visited[v]:
             iterative_explore(G,v)
             G._cc += 1 # Increments the component connected id as a new node will be visited from a new explore.
-
+    G.dfs_deprecated = False
+    
 def _setup_dfs(G):
     G._cc = 0 # The component connected id.
     G._clock = 1 # The visit order starts at 1, as seen on page 97, figure 3.6, item (b).
+    G.dfs_deprecated = True
     for v in G.nodes():
         G.visited[v] = False
         G.ccnum[v] = -1

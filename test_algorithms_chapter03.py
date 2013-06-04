@@ -220,6 +220,21 @@ class Test(unittest.TestCase):
         g.add_edge('H', 'L')
         return g
 
+    def test_is_connected(self):
+        g = self.create_graph_example()
+        dfs(g)
+        self.assertFalse(g.is_connected())
+        g.remove_node('C')
+        g.remove_node('D')
+        g.remove_node('F')
+        g.remove_node('G')
+        g.remove_node('H')
+        g.remove_node('K')
+        g.remove_node('L')
+        dfs(g)
+        self.assertTrue(g.is_connected())
+        
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
