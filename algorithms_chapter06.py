@@ -47,7 +47,7 @@ def longest_increasing_subsequence2(li):
     i = L.index(max(L))
     path = 'DNE'
     while i >=0:
-        path += ' >- ' + str(i)
+        path += ' >- ' + str(li[i])
         i = prev[i]
     print 'Path: ' + path[::-1]
 #    nx.draw_circular(G)
